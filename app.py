@@ -1,4 +1,4 @@
-# app.py – V8.6 + notify.mp3 (Actualizado: Tarjeta Amarilla para SKUs Repetidos/Omitidos)
+# app.py – V8.6 + notify.mp3 (Actualizado para Render)
 # - NUEVO V8.6: Detección visual de duplicados con Tarjeta Amarilla de advertencia.
 # - V8.5: Ajustes de procesamiento agrupados en un Accordion. Botones reubicados.
 # - V8.4: Tarjetas Roja y Verde estáticas y forzadas a Dark Mode.
@@ -188,7 +188,6 @@ def parse_grouped_skus(text: str) -> tuple[list[tuple[str, str]], dict[str, list
                         seen.add(sku)
                         out.append((current_category, sku))
                     else:
-                        # Si ya lo vimos, lo guardamos en los duplicados
                         if current_category not in duplicates:
                             duplicates[current_category] = []
                         duplicates[current_category].append(sku)
@@ -735,7 +734,6 @@ client = LiverpoolClient()
 
 # ====================== Motor Central ======================
 
-# V8.6 FIX: core_engine ahora acepta y despacha "duplicates_dict"
 def core_engine(parsed_skus, duplicates_dict, delay_val, usar_google_val, show_url_val, show_name_val, show_strategy_val, prefix="ENTREGABLE"):
     
     total = len(parsed_skus)
@@ -820,7 +818,7 @@ try: THEME = gr.themes.Soft(primary_hue="fuchsia", secondary_hue="violet", neutr
 except: THEME = gr.themes.Soft()
 CUSTOM_CSS = ".download-row .wrap { gap: 8px !important; align-items: center; }"
 
-with gr.Blocks(theme=THEME, css=CUSTOM_CSS, head=HEAD_JS, title="V8.6 – Generador de Entregable") as demo:
+with gr.Blocks(title="V8.6 – Generador de Entregable") as demo:
     df_state = gr.State()
     
     gr.Markdown("### V8.6 – Tarjetas Inteligentes (Éxito, Repetidos, Descatalogados)")
@@ -852,7 +850,7 @@ with gr.Blocks(theme=THEME, css=CUSTOM_CSS, head=HEAD_JS, title="V8.6 – Genera
     gr.Markdown("---")
     
     out_stats_shared = gr.HTML(visible=False) 
-    out_duplicates_shared = gr.HTML(visible=False) # NUEVA TARJETA AMARILLA AÑADIDA A LA UI
+    out_duplicates_shared = gr.HTML(visible=False) 
     out_broken_md_shared = gr.HTML(visible=False) 
 
     with gr.Column(elem_classes=["download-row"]):
@@ -904,7 +902,6 @@ with gr.Blocks(theme=THEME, css=CUSTOM_CSS, head=HEAD_JS, title="V8.6 – Genera
     btn_proc_paste.click(
         fn=handler_paste,
         inputs=[skus_in, delay_global, google_global, show_url_global, show_name_global, show_strat_global],
-        # V8.6 FIX: Se agrega la variable "out_duplicates_shared" al array de salidas
         outputs=[out_stats_shared, out_duplicates_shared, out_broken_md_shared, out_gallery_shared, out_preview_shared, df_state, notif_audio],
         show_progress="hidden"
     ).then(
@@ -915,7 +912,6 @@ with gr.Blocks(theme=THEME, css=CUSTOM_CSS, head=HEAD_JS, title="V8.6 – Genera
     btn_proc_cat.click(
         fn=handler_extract,
         inputs=[cat_n1, cat_n2, cat_n3, limit_destacados, delay_global, google_global, show_url_global, show_name_global, show_strat_global],
-        # V8.6 FIX: Se agrega la variable "out_duplicates_shared" al array de salidas
         outputs=[out_stats_shared, out_duplicates_shared, out_broken_md_shared, out_gallery_shared, out_preview_shared, df_state, notif_audio],
         show_progress="hidden"
     ).then(
@@ -932,4 +928,10 @@ with gr.Blocks(theme=THEME, css=CUSTOM_CSS, head=HEAD_JS, title="V8.6 – Genera
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
-    demo.launch(server_name="0.0.0.0", server_port=port)
+    demo.launch(
+        server_name="0.0.0.0", 
+        server_port=port, 
+        theme=THEME, 
+        css=CUSTOM_CSS, 
+        head=HEAD_JS
+    )
