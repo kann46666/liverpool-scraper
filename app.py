@@ -931,4 +931,5 @@ with gr.Blocks(theme=THEME, css=CUSTOM_CSS, head=HEAD_JS, title="V8.6 – Genera
     ).then(fn=post_zip_ui, inputs=[], outputs=[btn_master_zip])
 
 if __name__ == "__main__":
-    demo.launch()
+    port = int(os.environ.get("PORT", 7860))
+    demo.launch(server_name="0.0.0.0", server_port=port)
